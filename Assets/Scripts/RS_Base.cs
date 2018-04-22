@@ -118,4 +118,12 @@ public class RS_Base
     {
 
     }
+
+    /// <summary>
+    /// 用于显示内部运算的细节
+    /// </summary>
+    public virtual string ShowInfo()
+    {
+        return "";
+    }
 }

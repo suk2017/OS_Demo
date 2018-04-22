@@ -67,18 +67,15 @@ public class RS_OPT : RS_Base
     /// <returns></returns>
     private bool Exist(int[] list, int page, out int pos)
     {
-        string sb = "";
         //长度应该使用used 但是这样也可以 因为初始时为-1
         for (int i = 0; i < list.Length; ++i)
         {
-            sb += list[i] + " ";
             if (page == list[i])
             {
                 pos = i;
                 return true;
             }
         }
-        Debug.Log(sb);
         pos = -1;
         return false;
     }
@@ -123,5 +120,20 @@ public class RS_OPT : RS_Base
             }
         }
         return defaultPos;
+    }
+
+    /// <summary>
+    /// 显示运算细节
+    /// </summary>
+    public override string ShowInfo()
+    {
+        if (ListManager.steps == null || ListManager.steps.Count == 0 || ListManager.step < 0 || ListManager.step > ListManager.steps.Count - 2)
+        {
+            return "根据未调度的序列，未来使用频率最低的是:\n\n替换时使用第一个数字代表的位置";
+        }
+        else
+        {
+            return "根据未调度的序列，未来使用频率最低的是:\n" + ListManager.steps[ListManager.step + 1] + "\n替换时使用第一个数字代表的位置";
+        }
     }
 }

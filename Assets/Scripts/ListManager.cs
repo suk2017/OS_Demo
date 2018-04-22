@@ -11,14 +11,16 @@ public class ListManager : MonoBehaviour
 {
     public GameObject page_Prefag;
     //public int[] Pages;//初始序列
-    public Transform[] position;
-    public Texture2D[] num;//数字材质
+    //public Texture2D[] num;//数字材质
     public Material mat;//材质
     public float length;
     public GameObject setting;
     public InputField PagesList;
     public InputField PagePosCount;
     public Dropdown Dropdown_RS;
+    public Text serial;
+    public Text newNum;
+    public Text info;
 
 
     [Range(0, 2)] private int RS;
@@ -28,6 +30,10 @@ public class ListManager : MonoBehaviour
     private GameObject[] currentObject;//变动页框移入的页
     private bool waiting = false;
     private EventSystem eventSystem;
+    private string nextNum;
+    private string defaultSerial = "6 0 1 2 0 3 0 4 2 3 0 3 2 1 2 0 1 6 0 1";//默认序列
+    private string defaultCount = "3";//默认页框数
+    private Transform[] position;//页框位置
 
 
     public static bool avaliable = false;//是否可以进行下一步
@@ -47,9 +53,11 @@ public class ListManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator PageStream()
     {
-        while (step < pages.Count - 1)
+        serial.text = GetSteps();
+        info.text = currentRS.ShowInfo();
+        while (!(currentRS is RS_OPT) || step <= pages.Count - 1)
         {
-            yield return new WaitUntil(() => avaliable);//等到用户按下按钮或者自动下一步
+            yield return new WaitUntil(() => avaliable && pages.Count > step + 1);//等到用户按下按钮或者自动下一步
 
             if (isOPT)
             {
@@ -67,8 +75,11 @@ public class ListManager : MonoBehaviour
                 ChangeColor();//更新模型
             }
 
+            serial.text = GetSteps();
+
             avaliable = false;
             yield return new WaitForSeconds(1.0f);//至少等待一秒再继续下一步
+            info.text = currentRS.ShowInfo();
         }
         print("调度结束");
     }
@@ -76,7 +87,6 @@ public class ListManager : MonoBehaviour
     private void NextPage_OPT()
     {
         ++step;
-        print(pages[step] + " " + memory[steps[step]]);
         if (step <= 0 || pages[step] != memory[steps[step]])
         {
             StartCoroutine(MoveModel());//载入内存中
@@ -142,7 +152,8 @@ public class ListManager : MonoBehaviour
         int pos = steps[step];
         //移动模型
         GameObject newPage = Instantiate(page_Prefag, position[pos].position + new Vector3(0, length, 0), Quaternion.Euler(new Vector3(0, 90, 0)));
-        newPage.GetComponent<MeshRenderer>().material.mainTexture = num[pages[step]];
+        //newPage.GetComponent<MeshRenderer>().material.mainTexture = num[pages[step]];
+        newPage.transform.GetChild(0).GetComponent<TextMesh>().text = pages[step] + "";
         yield return null;
         newPage.transform.DOMoveY(newPage.transform.position.y - length, 1.0f);
         if (memoryPageModel[pos])
@@ -171,9 +182,13 @@ public class ListManager : MonoBehaviour
         if (RS_IN) { currentRS.IN(); };
     }
 
+    /// <summary>
+    /// 从字符串中获取列表
+    /// </summary>
     private List<int> StringToList(string value)
     {
         List<int> result = new List<int>();
+        value += " ";
         string num = "";
         for (int i = 0; i < value.Length; ++i)
         {
@@ -194,6 +209,18 @@ public class ListManager : MonoBehaviour
         return result;
     }
 
+    /// <summary>
+    /// 恢复默认
+    /// </summary>
+    public void _Reset()
+    {
+        PagesList.text = defaultSerial;
+        PagePosCount.text = defaultCount;
+    }
+
+    /// <summary>
+    /// 初始化
+    /// </summary>
     private void Initial()
     {
         pages = new List<int>();
@@ -222,6 +249,8 @@ public class ListManager : MonoBehaviour
             count = PlayerPrefs.GetInt("pagePosCount");
             RS = PlayerPrefs.GetInt("dropDown_RS");
 
+            if (count < 1) { count = 1; }
+
         }
 
         memory = new int[count];
@@ -241,6 +270,9 @@ public class ListManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 打开关闭设置面板
+    /// </summary>
     public void _Setting()
     {
         if (setting.activeInHierarchy)
@@ -270,13 +302,56 @@ public class ListManager : MonoBehaviour
 
         SceneManager.LoadScene("RS");
     }
+
+    /// <summary>
+    /// steps转化为string 倒序
+    /// </summary>
+    /// <returns></returns>
+    public string GetSteps()
+    {
+        string result = "";
+        if (pages == null || step == pages.Count - 1)
+        {
+            if (currentRS is RS_OPT)
+            {
+                result = "调度结束（使用OPT算法 因此无法动态增加）";
+            }
+            else
+            {
+                result = "序列为空";
+            }
+        }
+        else
+        {
+            for (int i = pages.Count - 1; i > step + 1; --i)
+            {
+                result += pages[i] + " ";
+            }
+            result += "<b>" + pages[step + 1] + "</b>";
+        }
+
+        return result;
+    }
     ///////////////////////////////////
 
+    public GameObject PageFrame_Prefab;
+    public Transform rootOfPageFrame;
     private void Start()
     {
-        Initial();
+        Initial();//可重复初始化的地方
+
         steps = new List<int>();
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+
+        position = new Transform[count];
+        position[0] = Instantiate(PageFrame_Prefab, rootOfPageFrame.position + new Vector3(2, 0, 0), Quaternion.identity, rootOfPageFrame.transform).transform;
+        position[0].GetChild(0).GetComponent<TextMesh>().text = "0";
+        for (int i = 1; i < count; ++i)
+        {
+            position[i] = Instantiate(PageFrame_Prefab, position[i - 1].position + new Vector3(2, 0, 0), Quaternion.identity, rootOfPageFrame.transform).transform;
+            position[i].GetChild(0).GetComponent<TextMesh>().text = i + "";
+        }
+        rootOfPageFrame.position -= new Vector3((count - 1) , 0, 0);
 
         if (currentRS is RS_OPT)
         {
@@ -314,6 +389,71 @@ public class ListManager : MonoBehaviour
         {
             avaliable = true;
         }
+
+        if (!isOPT)
+        {
+            if (Input.GetKeyDown(KeyCode.Keypad0))
+            {
+                nextNum += 0;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad1))
+            {
+                nextNum += 1;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                nextNum += 2;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad3))
+            {
+                nextNum += 3;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad4))
+            {
+                nextNum += 4;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad5))
+            {
+                nextNum += 5;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad6))
+            {
+                nextNum += 6;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad7))
+            {
+                nextNum += 7;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad8))
+            {
+                nextNum += 8;
+            }
+            if (Input.GetKeyDown(KeyCode.Keypad9))
+            {
+                nextNum += 9;
+            }
+            if (Input.GetKeyDown(KeyCode.Backspace))
+            {
+                if (nextNum.Length > 0)
+                {
+                    nextNum = nextNum.Substring(0, nextNum.Length - 1);
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.KeypadEnter))
+            {
+                int num = 0;
+                if (int.TryParse(nextNum, out num))
+                {
+                    pages.Add(num);
+                    nextNum = "";
+                    serial.text = GetSteps();
+                }
+            }
+        }
+
+
+        newNum.text = nextNum;
     }
 
     private IEnumerator AutoDestroy(GameObject target, float time)

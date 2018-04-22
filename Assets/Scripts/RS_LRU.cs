@@ -35,9 +35,9 @@ public class RS_LRU : RS_Base
         {
             freq.Add(value);
         }
-        for(int i = 0; i < freq.Count - 1; ++i)
+        for (int i = 0; i < freq.Count - 1; ++i)
         {
-            if(freq[i] == value)
+            if (freq[i] == value)
             {
                 freq.RemoveAt(i);
             }
@@ -48,7 +48,6 @@ public class RS_LRU : RS_Base
         {
             tempOrderString += freq[i] + " ";
         }
-        Debug.Log(tempOrderString);
     }
 
     /// <summary>
@@ -67,6 +66,18 @@ public class RS_LRU : RS_Base
 
     }
 
+    /// <summary>
+    /// 显示运算细节
+    /// </summary>
+    public override string ShowInfo()
+    {
+        string result = "";
+        for (int i = 0; i < freq.Count; ++i)
+        {
+            result += freq[i] + " ";
+        }
+        return "根据已调度的序列，按使用顺序先后排序:\n" + result + "\n替换时使用第一个数字代表的位置";
+    }
 
     //public override bool Detect(int page)
     //{

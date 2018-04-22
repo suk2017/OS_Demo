@@ -63,4 +63,16 @@ public class RS_FIFO : RS_Base
         Debug.Log(tempOrderString);
     }
 
+    /// <summary>
+    /// 显示运算细节
+    /// </summary>
+    public override string ShowInfo()
+    {
+        string result = "";
+        for (int i = 0; i < order.Count; ++i)
+        {
+            result += order[i] + " ";
+        }
+        return "根据已调度的序列，按进入顺序先后排序:\n" + result + "\n替换时使用第一个数字代表的位置";
+    }
 }
