@@ -9,14 +9,19 @@ public class RS_Base
     public int count = 0;//当前已使用的数量 前期小于Pos.Length 后期等于Pos.Length
     public int latest;
 
+    public ListManager listManager;
+
+    public int PageLostCount;//缺页故障次数
+    
+
     public RS_Base()
     {
 
     }
 
-    public RS_Base(int MaxLength)
+    public RS_Base(int MaxLength, ListManager lm)
     {
-
+        listManager = lm;
     }
 
     ///// <summary>
@@ -116,7 +121,7 @@ public class RS_Base
     /// </summary>
     public virtual void IN()
     {
-
+        ++PageLostCount;
     }
 
     /// <summary>
@@ -125,5 +130,10 @@ public class RS_Base
     public virtual string ShowInfo()
     {
         return "";
+    }
+
+    public int GetPageLostCount()
+    {
+        return PageLostCount;
     }
 }

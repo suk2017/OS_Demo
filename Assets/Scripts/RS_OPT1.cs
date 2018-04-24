@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RS_OPT : RS_Base
+public class RS_OPT1 : RS_Base
 {
-
+    public RS_Manager rs;
 
     private List<int> pageList;
     private List<int> steps;
@@ -12,8 +12,9 @@ public class RS_OPT : RS_Base
     private int used;
     private int step;
 
-    public RS_OPT(ListManager lm) : base(0, lm)
+    public RS_OPT1(RS_Manager lm)
     {
+        rs = lm;
         RS_Name = "OPT算法";
     }
 
@@ -24,7 +25,7 @@ public class RS_OPT : RS_Base
     {
         pageList = ListManager.pages;
         steps = new List<int>();
-        Memory = new int[ListManager.memory.Length];
+        Memory = new int[rs.memory.Length];
         for (int i = 0; i < Memory.Length; ++i)
         {
             Memory[i] = -1;
@@ -127,13 +128,24 @@ public class RS_OPT : RS_Base
     /// </summary>
     public override string ShowInfo()
     {
-        if (ListManager.steps == null || ListManager.steps.Count == 0 || listManager.step < 0 || listManager.step > ListManager.steps.Count - 2)
+        //if (rs.steps == null || rs.steps.Count == 0 || rs.step < 0 || rs.step > rs.steps.Count - 2)
+        
+        if (rs.steps == null || rs.steps.Count == 0 || rs.step + 1 >= RS_Manager.pages.Count)
         {
             return "根据未调度的序列，未来使用频率最低的是:\n\n替换时使用第一个数字代表的位置";
         }
         else
         {
-            return "根据未调度的序列，未来使用频率最低的是:\n" + ListManager.steps[listManager.step + 1] + "\n替换时使用第一个数字代表的位置";
+            return "根据未调度的序列，未来使用频率最低的是:\n" + rs.steps[rs.step] + "\n替换时使用第一个数字代表的位置";
         }
+    }
+
+    /// <summary>
+    /// 进入时调用一次
+    /// </summary>
+    public override void IN()
+    {
+
+        ++PageLostCount;
     }
 }

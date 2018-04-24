@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RS_LRU : RS_Base
+public class RS_LRU1 : RS_Base
 {
+    public RS_Manager rs;
 
     private List<int> freq;
 
-    public RS_LRU(int count, ListManager lm) : base(count, lm)
+    public RS_LRU1(int count, RS_Manager lm)
     {
+        rs = lm;
         freq = new List<int>();
         RS_Name = "LRU算法";
     }
@@ -30,11 +32,11 @@ public class RS_LRU : RS_Base
     /// </summary>
     public override void Use()
     {
-        if (listManager.step < 0)
+        if (rs.step < 0)
         {
             return;
         }
-        int value = ListManager.steps[listManager.step];
+        int value = rs.steps[rs.step];
         if (freq.Count == 0 || freq[freq.Count - 1] != value)
         {
             freq.Add(value);
@@ -68,6 +70,7 @@ public class RS_LRU : RS_Base
     public override void IN()
     {
 
+        ++PageLostCount;
     }
 
     /// <summary>

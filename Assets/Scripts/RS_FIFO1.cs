@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RS_FIFO : RS_Base
+public class RS_FIFO1 : RS_Base
 {
+    public RS_Manager rs;
 
     private List<int> order;
 
-    public RS_FIFO(int count, ListManager lm) : base(count, lm)
+    public RS_FIFO1(int count, RS_Manager lm)
     {
+        rs = lm;
         order = new List<int>();
         RS_Name = "FIFO算法";
     }
@@ -53,14 +55,15 @@ public class RS_FIFO : RS_Base
         //{
         //    order.RemoveAt(0);
         //}
-        order.Add(ListManager.steps[listManager.step]);
+        order.Add(rs.steps[rs.step]);
 
         string tempOrderString = "";
         for (int i = 0; i < order.Count; ++i)
         {
             tempOrderString += order[i] + " ";
         }
-        Debug.Log(tempOrderString);
+
+        ++PageLostCount;
     }
 
     /// <summary>
