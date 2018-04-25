@@ -298,6 +298,7 @@ public class RS_Manager : MonoBehaviour
             //RS = PlayerPrefs.GetInt("dropDown_RS");
 
             if (count < 1) { count = 1; }
+            if (count > 9) { count = 9; }
 
         }
 

@@ -105,7 +105,16 @@ public class UIManager : MonoBehaviour
     {
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         PagesList.text = PlayerPrefs.GetString("pagesList");
-        PagePosCount.text = "" + PlayerPrefs.GetInt("pagePosCount");
+        int count = PlayerPrefs.GetInt("pagePosCount");
+        if (count < 1)
+        {
+            count = 1;
+        }
+        if (count > 9)
+        {
+            count = 9;
+        }
+        PagePosCount.text = count + "";
     }
 
     private void Update()
